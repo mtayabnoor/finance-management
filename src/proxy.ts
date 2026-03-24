@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
-  // Better Auth uses "better-auth.session_token" cookie by default
-  const sessionToken = request.cookies.get("better-auth.session_token");
+  // Better Auth uses "better-auth.session_token" cookie by default (or __Secure- prefix on Vercel)
+  const sessionToken =
+    request.cookies.get("better-auth.session_token")?.value ||
+    request.cookies.get("__Secure-better-auth.session_token")?.value;
 
   const isDashboardRoute =
     request.nextUrl.pathname.startsWith("/dashboard") ||
