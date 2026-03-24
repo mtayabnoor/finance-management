@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { auth } from '@/lib/auth';
 
-export function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   // Better Auth uses "better-auth.session_token" cookie by default (or __Secure- prefix on Vercel)
-  const sessionToken =
-    request.cookies.get("better-auth.session_token")?.value ||
-    request.cookies.get("__Secure-better-auth.session_token")?.value;
+    const session = await auth.api.getSession({
+    headers: request.headers,
+  });
+
+  const isLoggedIn = !!session?.user;
 
   const isDashboardRoute =
     request.nextUrl.pathname.startsWith("/dashboard") ||
@@ -13,7 +16,7 @@ export function proxy(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/subscriptions") ||
     request.nextUrl.pathname.startsWith("/insights");
 
-  if (!sessionToken && isDashboardRoute) {
+  if (!isLoggedIn && isDashboardRoute) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -26,5 +29,6 @@ export const config = {
     "/transactions/:path*",
     "/subscriptions/:path*",
     "/insights/:path*",
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|robots.txt|sitemap.xml).*)'
   ],
 };
