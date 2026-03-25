@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
   try {
     await auth.api.sendVerificationEmail({
-      body: { email, callbackURL: "/verify-email" },
+      body: { email, callbackURL: "/email-verified" },
     });
     return Response.json({ status: "ok" }, { status: 200 });
   } catch {
