@@ -14,6 +14,12 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import Link from "next/link";
 
 import { useForm } from "react-hook-form";
@@ -21,7 +27,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "@/lib/validators";
 import { Signup } from "@/lib/types";
 
-export default function RegisterPage() {
+export default function SignUpPage() {
   const router = useRouter();
 
   const {
@@ -70,50 +76,53 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Global Error */}
             {errors.root && (
-              <p className="text-sm text-red-500">{errors.root.message}</p>
+              <FieldError errors={[errors.root]} />
             )}
 
-            {/* Name */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Name</label>
-              <Input
-                placeholder="John Doe"
-                {...register("name")}
-                autoComplete="off"
-              />
-              {errors.name && (
-                <p className="text-xs text-red-500">{errors.name.message}</p>
-              )}
-            </div>
+            <FieldGroup>
+              {/* Name */}
+              <Field data-invalid={!!errors.name}>
+                <FieldLabel htmlFor="signup-name">Name</FieldLabel>
+                <Input
+                  id="signup-name"
+                  placeholder="John Doe"
+                  {...register("name")}
+                  autoComplete="off"
+                />
+                {errors.name && (
+                  <FieldError errors={[errors.name]} />
+                )}
+              </Field>
 
-            {/* Email */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Email</label>
-              <Input
-                type="email"
-                placeholder="name@example.com"
-                {...register("email")}
-                autoComplete="off"
-              />
-              {errors.email && (
-                <p className="text-xs text-red-500">{errors.email.message}</p>
-              )}
-            </div>
+              {/* Email */}
+              <Field data-invalid={!!errors.email}>
+                <FieldLabel htmlFor="signup-email">Email</FieldLabel>
+                <Input
+                  id="signup-email"
+                  type="email"
+                  placeholder="name@example.com"
+                  {...register("email")}
+                  autoComplete="off"
+                />
+                {errors.email && (
+                  <FieldError errors={[errors.email]} />
+                )}
+              </Field>
 
-            {/* Password */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Password</label>
-              <Input
-                type="password"
-                {...register("password")}
-                autoComplete="off"
-              />
-              {errors.password && (
-                <p className="text-xs text-red-500">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
+              {/* Password */}
+              <Field data-invalid={!!errors.password}>
+                <FieldLabel htmlFor="signup-password">Password</FieldLabel>
+                <Input
+                  id="signup-password"
+                  type="password"
+                  {...register("password")}
+                  autoComplete="off"
+                />
+                {errors.password && (
+                  <FieldError errors={[errors.password]} />
+                )}
+              </Field>
+            </FieldGroup>
 
             {/* Submit */}
             <Button type="submit" className="w-full" disabled={isSubmitting}>

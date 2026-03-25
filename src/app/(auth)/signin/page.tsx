@@ -14,6 +14,12 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import Link from "next/link";
 
 import { useForm } from "react-hook-form";
@@ -46,12 +52,9 @@ export default function SignInPage() {
           router.push("/dashboard");
         },
         onError: (ctx) => {
-          // Set form error
           setError("root", {
             message: ctx.error.message || "Invalid email or password",
           });
-
-          // Optional toast
           toast.error(ctx.error.message || "Signin failed");
         },
       },
@@ -72,40 +75,41 @@ export default function SignInPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Global Error */}
             {errors.root && (
-              <p className="text-sm text-red-500">{errors.root.message}</p>
+              <FieldError errors={[errors.root]} />
             )}
 
-            {/* Email */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Email</label>
-              <Input type="email" {...register("email")} autoComplete="off" />
-              {errors.email && (
-                <p className="text-xs text-red-500">{errors.email.message}</p>
-              )}
-            </div>
+            <FieldGroup>
+              {/* Email */}
+              <Field data-invalid={!!errors.email}>
+                <FieldLabel htmlFor="signin-email">Email</FieldLabel>
+                <Input
+                  id="signin-email"
+                  type="email"
+                  {...register("email")}
+                  autoComplete="off"
+                />
+                {errors.email && (
+                  <FieldError errors={[errors.email]} />
+                )}
+              </Field>
 
-            {/* Password */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Password</label>
-              <Input
-                type="password"
-                {...register("password")}
-                autoComplete="off"
-              />
-              {errors.password && (
-                <p className="text-xs text-red-500">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
+              {/* Password */}
+              <Field data-invalid={!!errors.password}>
+                <FieldLabel htmlFor="signin-password">Password</FieldLabel>
+                <Input
+                  id="signin-password"
+                  type="password"
+                  {...register("password")}
+                  autoComplete="off"
+                />
+                {errors.password && (
+                  <FieldError errors={[errors.password]} />
+                )}
+              </Field>
+            </FieldGroup>
 
             {/* Submit */}
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isSubmitting}
-              form="signin-form"
-            >
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Signing in..." : "Sign In"}
             </Button>
           </form>

@@ -10,6 +10,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { createTransaction } from "@/lib/actions";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -23,7 +29,13 @@ export function TransactionForm() {
   const [open, setOpen] = useState(false);
   const [isExpense, setIsExpense] = useState(true);
 
-  const form = useForm<TransactionFormValues>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+    reset,
+  } = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionFormSchema),
     defaultValues: {
       amount: undefined,
@@ -48,9 +60,9 @@ export function TransactionForm() {
 
       toast.success("Transaction saved");
       setOpen(false);
-      form.reset();
+      reset();
     } catch (error) {
-      form.setError("root", {
+      setError("root", {
         message: error instanceof Error ? error.message : "Failed to save",
       });
       toast.error("Failed to save transaction");
@@ -59,7 +71,7 @@ export function TransactionForm() {
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
-    if (!newOpen) form.reset();
+    if (!newOpen) reset();
   };
 
   return (
@@ -93,75 +105,72 @@ export function TransactionForm() {
           </Button>
         </div>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Global Error */}
-          {form.formState.errors.root && (
-            <p className="text-sm text-red-500">
-              {form.formState.errors.root.message}
-            </p>
+          {errors.root && (
+            <FieldError errors={[errors.root]} />
           )}
 
-          {/* Amount */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Amount</label>
-            <Input
-              type="number"
-              step="0.01"
-              min="0.01"
-              placeholder="0.00"
-              {...form.register("amount", { valueAsNumber: true })}
-              autoComplete="off"
-            />
-            {form.formState.errors.amount && (
-              <p className="text-xs text-red-500">
-                {form.formState.errors.amount.message}
-              </p>
-            )}
-          </div>
+          <FieldGroup>
+            {/* Amount */}
+            <Field data-invalid={!!errors.amount}>
+              <FieldLabel htmlFor="txn-amount">Amount</FieldLabel>
+              <Input
+                id="txn-amount"
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder="0.00"
+                {...register("amount", { valueAsNumber: true })}
+                autoComplete="off"
+              />
+              {errors.amount && (
+                <FieldError errors={[errors.amount]} />
+              )}
+            </Field>
 
-          {/* Category */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Category</label>
-            <Input
-              placeholder="e.g. Groceries"
-              {...form.register("category")}
-              autoComplete="off"
-            />
-            {form.formState.errors.category && (
-              <p className="text-xs text-red-500">
-                {form.formState.errors.category.message}
-              </p>
-            )}
-          </div>
+            {/* Category */}
+            <Field data-invalid={!!errors.category}>
+              <FieldLabel htmlFor="txn-category">Category</FieldLabel>
+              <Input
+                id="txn-category"
+                placeholder="e.g. Groceries"
+                {...register("category")}
+                autoComplete="off"
+              />
+              {errors.category && (
+                <FieldError errors={[errors.category]} />
+              )}
+            </Field>
 
-          {/* Date */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Date</label>
-            <Input type="date" {...form.register("date")} />
-            {form.formState.errors.date && (
-              <p className="text-xs text-red-500">
-                {form.formState.errors.date.message}
-              </p>
-            )}
-          </div>
+            {/* Date */}
+            <Field data-invalid={!!errors.date}>
+              <FieldLabel htmlFor="txn-date">Date</FieldLabel>
+              <Input
+                id="txn-date"
+                type="date"
+                {...register("date")}
+              />
+              {errors.date && (
+                <FieldError errors={[errors.date]} />
+              )}
+            </Field>
 
-          {/* Note */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Note (Optional)</label>
-            <Input
-              placeholder="Bought some milk"
-              {...form.register("note")}
-              autoComplete="off"
-            />
-          </div>
+            {/* Note */}
+            <Field>
+              <FieldLabel htmlFor="txn-note">Note (Optional)</FieldLabel>
+              <Input
+                id="txn-note"
+                placeholder="Bought some milk"
+                {...register("note")}
+                autoComplete="off"
+              />
+            </Field>
+          </FieldGroup>
 
           {/* Submit */}
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? "Saving..." : "Save Transaction"}
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save Transaction"}
           </Button>
         </form>
       </DialogContent>
