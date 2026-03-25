@@ -28,8 +28,8 @@ Recharts (or similar lightweight charting library)
 🔹 1. Folder Structure (Production-Ready)
 /app
 /(auth)
-/login
-/register
+/signin
+/signup
 
 /(dashboard)
 /dashboard
