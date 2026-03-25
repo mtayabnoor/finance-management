@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowDownIcon, ArrowUpIcon, CreditCard, DollarSign } from "lucide-react";
 
@@ -9,7 +10,13 @@ export default async function DashboardPage() {
     headers: await headers(),
   });
 
-  if (!session) return null;
+  if (!session?.user) {
+    redirect("/signin");
+  }
+
+  if (!session.user.emailVerified) {
+    redirect(`/verify-email?mode=pending&email=${encodeURIComponent(session.user.email)}`);
+  }
 
   const [transactions, subscriptions] = await Promise.all([
     prisma.transaction.findMany({

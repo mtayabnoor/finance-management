@@ -20,6 +20,13 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/signin", request.url));
   }
 
+  if (isLoggedIn && isDashboardRoute && !session.user.emailVerified) {
+    const verifyUrl = new URL("/verify-email", request.url);
+    verifyUrl.searchParams.set("mode", "pending");
+    verifyUrl.searchParams.set("email", session.user.email);
+    return NextResponse.redirect(verifyUrl);
+  }
+
   return NextResponse.next();
 }
 

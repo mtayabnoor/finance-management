@@ -34,3 +34,25 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Email verification setup
+
+This project uses BetterAuth + Resend for email verification.
+
+Required environment variables:
+
+```bash
+RESEND_API_KEY=your_resend_api_key
+RESEND_FROM_EMAIL=Finance App <no-reply@yourdomain.com>
+BETTER_AUTH_SECRET=your_better_auth_secret
+BETTER_AUTH_URL=http://localhost:3000
+DATABASE_URL=your_database_url
+```
+
+Verification flow:
+
+1. User signs up with email/password.
+2. BetterAuth creates a verification token and the app stores a hashed copy in `verification_tokens`.
+3. Resend sends the verification link.
+4. User opens `/verify-email?token=...`, which validates the stored token and then verifies via BetterAuth.
+5. Verified users can sign in and access protected routes.

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { TransactionForm } from "@/components/forms/transaction-form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +11,13 @@ export default async function TransactionsPage() {
     headers: await headers(),
   });
 
-  if (!session) return null;
+  if (!session?.user) {
+    redirect("/signin");
+  }
+
+  if (!session.user.emailVerified) {
+    redirect(`/verify-email?mode=pending&email=${encodeURIComponent(session.user.email)}`);
+  }
 
   const transactions = await prisma.transaction.findMany({
     where: { userId: session.user.id },

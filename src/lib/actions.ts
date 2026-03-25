@@ -14,9 +14,21 @@ async function getSession() {
   return session;
 }
 
+function assertVerifiedSession(
+  session: Awaited<ReturnType<typeof getSession>>,
+): asserts session is NonNullable<Awaited<ReturnType<typeof getSession>>> {
+  if (!session || !session.user) {
+    throw new Error("Unauthorized");
+  }
+
+  if (!session.user.emailVerified) {
+    throw new Error("Email is not verified");
+  }
+}
+
 export async function createTransaction(data: z.infer<typeof transactionSchema>) {
   const session = await getSession();
-  if (!session || !session.user) throw new Error("Unauthorized");
+  assertVerifiedSession(session);
 
   const parsed = transactionSchema.parse(data);
 
@@ -33,7 +45,7 @@ export async function createTransaction(data: z.infer<typeof transactionSchema>)
 
 export async function deleteTransaction(id: string) {
   const session = await getSession();
-  if (!session || !session.user) throw new Error("Unauthorized");
+  assertVerifiedSession(session);
 
   const transaction = await prisma.transaction.findUnique({ where: { id } });
   if (!transaction || transaction.userId !== session.user.id) {
@@ -48,7 +60,7 @@ export async function deleteTransaction(id: string) {
 
 export async function createSubscription(data: z.infer<typeof subscriptionSchema>) {
   const session = await getSession();
-  if (!session || !session.user) throw new Error("Unauthorized");
+  assertVerifiedSession(session);
 
   const parsed = subscriptionSchema.parse(data);
 
@@ -65,7 +77,7 @@ export async function createSubscription(data: z.infer<typeof subscriptionSchema
 
 export async function deleteSubscription(id: string) {
   const session = await getSession();
-  if (!session || !session.user) throw new Error("Unauthorized");
+  assertVerifiedSession(session);
 
   const subscription = await prisma.subscription.findUnique({ where: { id } });
   if (!subscription || subscription.userId !== session.user.id) {

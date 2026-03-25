@@ -46,11 +46,16 @@ export default function SignUpPage() {
 
   const onSubmit = async (values: Signup) => {
     await authClient.signUp.email(
-      { email: values.email, password: values.password, name: values.name },
+      {
+        email: values.email,
+        password: values.password,
+        name: values.name,
+        callbackURL: "/verify-email",
+      },
       {
         onSuccess: () => {
-          toast.success("Account created successfully");
-          router.push("/dashboard");
+          toast.success("Account created. Check your email to verify your account.");
+          router.push(`/verify-email?mode=pending&email=${encodeURIComponent(values.email)}`);
         },
         onError: (ctx) => {
           setError("root", {
