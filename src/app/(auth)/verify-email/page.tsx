@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ type VerifyStatus = "idle" | "loading" | "success" | "invalid" | "expired";
 
 function VerifyEmailContent() {
   const params = useSearchParams();
+  const router = useRouter();
   const token = params.get("token");
   const mode = params.get("mode");
   const emailFromQuery = params.get("email") || "";
@@ -71,6 +72,25 @@ function VerifyEmailContent() {
     };
   }, [token]);
 
+  // Redirect after successful verification
+  useEffect(() => {
+    if (status !== "success") return;
+
+    toast.success("Email verified successfully!");
+
+    const redirectTimer = setTimeout(() => {
+      if (mode === "pending") {
+        // User came from signup flow, redirect to dashboard
+        router.push("/dashboard");
+      } else {
+        // User verified email independently, redirect to signin
+        router.push("/signin");
+      }
+    }, 2000);
+
+    return () => clearTimeout(redirectTimer);
+  }, [status, mode, router]);
+
   const description = useMemo(() => {
     if (status === "loading") return "We are validating your verification token.";
     if (status === "success") return "Your email is verified. You can now sign in.";
@@ -120,6 +140,18 @@ function VerifyEmailContent() {
         </CardHeader>
 
         <CardContent className="space-y-4">
+          {status === "loading" && (
+            <div className="flex justify-center py-4">
+              <div className="animate-spin h-6 w-6 border border-primary border-t-transparent rounded-full" />
+            </div>
+          )}
+          {status === "success" && (
+            <div className="flex justify-center py-4">
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Redirecting to {mode === "pending" ? "dashboard" : "sign in"}...</p>
+              </div>
+            </div>
+          )}
           {(status === "idle" || status === "invalid" || status === "expired" || mode === "pending") && (
             <div className="space-y-2">
               <Input
