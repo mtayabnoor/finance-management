@@ -17,11 +17,10 @@ export const auth = betterAuth({
     sendOnSignIn: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url, token }) => {
-       const verifyUrl = `${url}&callbackURL=${encodeURIComponent("/email-verified")}`;
       await sendVerificationEmailWithResend({
         email: user.email,
         name: user.name,
-        verifyUrl,
+        verifyUrl: url,
       });
     },
   },
